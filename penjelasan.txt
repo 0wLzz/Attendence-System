@@ -1,0 +1,7 @@
+ini merupakan website yang menunjukkan data user company profile, terdapat fitur log in, log out, add user, delete user, update user, dan view user.
+
+untuk log in 
+email : limjiwen01@gmail.com
+pass : test123
+
+setelah itu akan ditampilkan tabel yang berisikan data-data user. Ada tombol action yang akan mengeluarkan popup melihat lebih detail lagi data-data user, mengubah atau menghapus data user tersebut.
