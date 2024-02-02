@@ -99,8 +99,7 @@ function addUser($data, $img)
     $result = $stmt->fetchColumn();
     
     if($result > 0){
-        $error = "Email Already Exist!";
-        return $error;
+        echo '<script>alert("Email Already Registered!");</script>';
     }
     else{
         move_uploaded_file($img['tmp_name'], 'img/' . $img['name']);
@@ -121,14 +120,25 @@ function addUser($data, $img)
 function updateUser($data)
 {
     $conn = connectToDB();
-    $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
-    $stmt->execute([
-        $data["first"],
-        $data["last"],
-        $data["email"],
-        $data["bio"],
-        $data["id"]
-    ]);
+    $email = $data["email"];
+    $stmt = $conn -> prepare("SELECT email FROM users WHERE email = '$email'");
+    $stmt->execute();
+    $result = $stmt->fetchColumn();
+    
+    if($result > 0){
+        echo '<script>alert("Email Already Registered!");</script>';
+    }
+    else{
+        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
+        $stmt->execute([
+            $data["first"],
+            $data["last"],
+            $data["email"],
+            $data["bio"],
+            $data["id"]
+        ]);
+        header("Location: index.php");
+    }
     closeConnection();
 }
 
@@ -142,4 +152,23 @@ function updatePhotoUser($data, $img)
         $data["id"]
     ]);
     closeConnection();
+}
+
+function searchUser($value)
+{
+    $conn = connectToDB();
+
+    $stmt = $conn->prepare("SELECT * FROM users WHERE CONCAT(first_name, last_name, email) LIKE :value");
+    $stmt->bindValue(':value', '%' . $value . '%', PDO::PARAM_STR);
+    $stmt->execute();
+
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if(count($result) > 0){
+        return $result;
+        closeConnection();
+    } else {
+        echo '<script>alert("Data Not Found");</script>';
+        return getAllUsers();
+    }
 }
