@@ -2,6 +2,7 @@
   require_once 'database/database.php';
 
   $users = getAllUsers();
+  $admins = getAdmin();
 
   if(isset($_POST["deleteBtn"])){
     deleteUser($_POST);
@@ -9,16 +10,41 @@
   }
 
   if (isset($_POST["addBtn"])){
-    addUser($_POST, $_FILES["file"]);
-    header("Location: index.php");
+    $error = addUser($_POST, $_FILES["file"]);
+    if(isset($error)){
+      echo '<script>alert("Email Already Registered!");</script>';
+    }
   }
 
   if(isset($_POST["updateBtn"])){
-    updateUser($_POST, $_FILES["file"]);
+    updateUser($_POST);
     header("Location: index.php");
   }
 
-  $admins = getAdmin();
+  if(isset($_POST["updatePhotoBtn"])){
+    updatePhotoUser($_POST, $_FILES["file"]);
+    header("Location: index.php");
+  }
+
+  if(isset($_GET["search"])){
+    $conn = connectToDB();
+    $value = $_GET["search"];
+
+    // Use prepared statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT * FROM users WHERE CONCAT(first_name, last_name, email) LIKE :value");
+    $stmt->bindValue(':value', '%' . $value . '%', PDO::PARAM_STR);
+    $stmt->execute();
+
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if(count($result) > 0){
+        $users = $result;
+        closeConnection();
+    } else {
+        echo '<script>alert("Data Not Found");</script>';
+    }
+  }
+
 ?>
 
 
@@ -27,7 +53,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Page | owenlimantoro_</title>
+    <title>Dashboard Page</title>
 
     <!-- CSS Link -->
     <link rel="stylesheet" href="style2.css">
@@ -44,7 +70,7 @@
     <!-- NavBar -->
     <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand">Website User</a>
+            <a class="navbar-brand">Attendence System</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -71,14 +97,14 @@
         </div>
     </nav>
 
-    <!-- Search Bar
+    <!-- Search Bar -->
     <div class="container" data-bs-theme="light" style="padding-top: 100px;">
-        <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <form class="d-flex" role="search" method="GET" action="">
+            <input class="form-control" type="text" name="search" placeholder="Search" aria-label="Search" value="<?php if(isset($_GET["search"])) echo $_GET["search"];?>" required>
             <button class="btn btn-primary" type="submit">Search</button>
         </form>
-    </div> -->
-
+    </div>
+    
     <!-- Table -->
     <div class="container my-5" style="background-color: rgb(255, 255, 255); color: black;">
         <table class="table table-hover caption-top" style="table-layout: fixed;">
@@ -141,30 +167,25 @@
                           <dialog class="editView" id="editView<?=$num?>">
                             <form method="POST" enctype="multipart/form-data">
                               <input type="hidden" name="id" value="<?= $user["id"]?>">
-                              <!-- Picture -->
-                              <h4>Picture :</h4> 
-                              <div class="form-floating my-3">
-                                <input type="file" class="form-control" accept="img/*"  id="picture" name="file" required>
-                              </div>
-                              
+                            
                               <h4>First Name :</h4> 
                               <div class="form-group mb-3 ">
-                                <input type="text" class="form-control" id="firstname" value=" <?= $user["first_name"] ?>" name="first" required>
+                                <input type="text" class="form-control" id="firstname" value="<?= $user["first_name"] ?>" name="first" required>
                               </div>
 
                               <h4>Last Name : </h4> 
                               <div class="form-group mb-3 ">
-                                <input type="text" class="form-control" id="lastname" value=" <?= $user["last_name"] ?>" name="last" required>
+                                <input type="text" class="form-control" id="lastname" value="<?= $user["last_name"] ?>" name="last" required>
                               </div>
   
                               <h4>Email : </h4> 
                               <div class="form-group mb-3 ">
-                                <input type="email" class="form-control" id="email" value=" <?= $user["email"] ?>" name="email" required>
+                                <input type="email" class="form-control" id="email" value="<?= $user["email"] ?>" name="email" required>
                               </div>
   
                               <h4>Bio : </h4> 
                               <div class="form-description mb-3 "> 
-                                <textarea class="form-control" id="bio" rows="4" name="bio"> <?= $user["bio"]?></textarea>
+                                <textarea class="form-control" id="bio" rows="4" name="bio"><?= $user["bio"]?></textarea>
                               </div>
 
                               <button type="submit" class="btn btn-primary" name="updateBtn">Update</button>
@@ -179,8 +200,24 @@
                             <input type="hidden" name="id" value="<?= $user["id"]?>">
                             <h2>Warning!</h2>
                             <h5>Are you sure you want to delete this?</h5>
-                            <button type="submit" class="btn btn-outline-danger" name="deleteBtn">Yes</button>
-                            <button type="button" class="btn btn-outline-secondary" formmethod="dialog" onclick="closeModal('warningRemove<?=$num?>')">No</button>
+                            <button type="submit" class="btn btn-danger" name="deleteBtn">Yes</button>
+                            <button type="button" class="btn btn-secondary" formmethod="dialog" onclick="closeModal('warningRemove<?=$num?>')">No</button>
+                          </form>
+                        </dialog>
+
+                        <!-- Update Photo Button -->
+                        <button class="btn btn-info rounded-5" style="margin-top: 0.5rem" type="button" onclick="openModal('editPhotoView<?=$num?>')">Update Photo</button>
+                        <dialog class="editView" id="editPhotoView<?=$num?>">
+                          <form method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="id" value="<?= $user["id"]?>">
+                            <!-- Picture -->
+                            <h4>Picture :</h4> 
+                            <div class="mb-3">
+                              <input type="file" class="form-control" accept="img/*"  id="picture" name="file" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" name="updatePhotoBtn">Update</button>
+                            <button type="reset" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('editPhotoView<?=$num?>')">Cancel</button>
                           </form>
                         </dialog>
                       </div>
@@ -225,13 +262,19 @@
                   <button type="reset" class="btn btn-warning" style="margin-top: 10px;" onclick="closeModal('editView')">Reset</button>
                 </form>
               </dialog>
+
+              <!-- <?php 
+              if(isset($error)){
+                echo('<div class="alert alert-danger" role="alert">' . $error . '</div>');
+              }              
+              ?> -->
           </div>
     </div>
 </body>
 
 <footer class="bg-body-tertiary text-center mt-auto">
     <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
-        @owenlimantoro_
+        Owen Limantoro || Michella Anjani || Stefani Maria  
       </div>
 </footer>
 
