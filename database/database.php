@@ -76,7 +76,7 @@ function getAdmin()
     $stmt = $conn->prepare("SELECT * FROM admin");
     $stmt->execute();
     $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    closeConnection(); // Pindahkan ini sebelum return
+    closeConnection();
     return $admins;
 }
 
@@ -91,33 +91,54 @@ function deleteUser($data)
 }
 
 function addUser($data, $img)
+{ 
+    $conn = connectToDB();
+    $email = $data["email"];
+    $stmt = $conn -> prepare("SELECT email FROM users WHERE email = '$email'");
+    $stmt->execute();
+    $result = $stmt->fetchColumn();
+    
+    if($result > 0){
+        $error = "Email Already Exist!";
+        return $error;
+    }
+    else{
+        move_uploaded_file($img['tmp_name'], 'img/' . $img['name']);
+        $password = md5($data["first"] . "123");
+        $stmt = $conn->prepare("INSERT INTO users (picture, first_name, last_name, email, bio, password) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([
+            $img["name"],
+            $data["first"],
+            $data["last"],
+            $data["email"],
+            $data["bio"],
+            $password
+        ]);
+    }
+    closeConnection();
+}
+
+function updateUser($data)
 {
     $conn = connectToDB();
-    move_uploaded_file($img['tmp_name'], 'img/' . $img['name']);
-    $password = md5($data["first"] . "123");
-    $stmt = $conn->prepare("INSERT INTO users (picture, first_name, last_name, email, bio, password) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
     $stmt->execute([
-        $img["name"],
         $data["first"],
         $data["last"],
         $data["email"],
         $data["bio"],
-        $password
+        $data["id"]
     ]);
     closeConnection();
 }
 
-function updateUser($data, $img)
+function updatePhotoUser($data, $img)
 {
     $conn = connectToDB();
     move_uploaded_file($img["tmp_name"], 'img/' . $img["name"]);
-    $stmt = $conn->prepare("UPDATE users SET picture = ?, first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE users SET picture = ? WHERE id = ?");
     $stmt->execute([
         $img["name"],
-        $data["first"],
-        $data["last"],
-        $data["email"],
-        $data["bio"],
         $data["id"]
     ]);
     closeConnection();
