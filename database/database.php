@@ -48,11 +48,11 @@ function login($data)
             }
             header("Location: index.php");
         }else{
-            echo '<h1 style="color:red;">Incorrect PASSWORD</h1>';
+            echo '<script>alert("Your PASSWORD is Incorrect!!!");</script>';
         }
     }
     else{
-        echo '<h1 style="color:red;">Unregistered EMAIL</h1>';
+        echo '<script>alert("Your EMAIL address is unregistered!!!");</script>';
     }    
     closeConnection();   
 }
