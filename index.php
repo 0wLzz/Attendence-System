@@ -9,16 +9,12 @@
     header("Location: index.php");
   }
 
-  if (isset($_POST["addBtn"])){
-    $error = addUser($_POST, $_FILES["file"]);
-    if(isset($error)){
-      echo '<script>alert("Email Already Registered!");</script>';
-    }
+  if(isset($_POST["addBtn"])){
+    addUser($_POST, $_FILES["file"]);
   }
 
   if(isset($_POST["updateBtn"])){
     updateUser($_POST);
-    header("Location: index.php");
   }
 
   if(isset($_POST["updatePhotoBtn"])){
@@ -27,22 +23,7 @@
   }
 
   if(isset($_GET["search"])){
-    $conn = connectToDB();
-    $value = $_GET["search"];
-
-    // Use prepared statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM users WHERE CONCAT(first_name, last_name, email) LIKE :value");
-    $stmt->bindValue(':value', '%' . $value . '%', PDO::PARAM_STR);
-    $stmt->execute();
-
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if(count($result) > 0){
-        $users = $result;
-        closeConnection();
-    } else {
-        echo '<script>alert("Data Not Found");</script>';
-    }
+    $users = searchUser($_GET["search"]);
   }
 
 ?>
@@ -262,12 +243,6 @@
                   <button type="reset" class="btn btn-warning" style="margin-top: 10px;" onclick="closeModal('editView')">Reset</button>
                 </form>
               </dialog>
-
-              <!-- <?php 
-              if(isset($error)){
-                echo('<div class="alert alert-danger" role="alert">' . $error . '</div>');
-              }              
-              ?> -->
           </div>
     </div>
 </body>
