@@ -63,20 +63,41 @@
                         Profile
                       </a>
                       <ul class="dropdown-menu">
-                          <?php foreach($admins as $admin):?>
+                          <!-- <?php foreach($admins as $admin):?>
                           <h6 class=" dropdown-item">First Name : <?= $admin["first_name"] ?></h6>
                           <h6 class=" dropdown-item">Last Name : <?= $admin["last_name"] ?></h6>
                           <h6 class=" dropdown-item">Email : <?= $admin["email"] ?></h6>
                           <h6 class=" dropdown-item">Bio : <?= $admin["bio"] ?></h6>
-                          <?php endforeach; ?>
-                        </li>
+                          <?php endforeach; ?> -->
+
+                        <li><button class="dropdown-item" type="button" onclick="openModal('profileView')">Admin</button></li>
                         <li><a class="dropdown-item" href="Logout.php"> <span style="color: red;">Log Out</span></a></li>
                       </ul>
                     </li>
+
+                    <dialog class="editView" id="profileView">
+                      <?php foreach($admins as $admin):?>
+                      <h4>First Name : </h4> 
+                      <span> <?= $admin["first_name"] ?></span>
+
+                      <h4>Last Name : </h4> 
+                      <span> <?= $admin["last_name"] ?> </span>
+
+                      <h4>Email : </h4> 
+                      <span> <?= $admin["email"] ?> </span>
+
+                      <h4>Bio : </h4> 
+                      <span> <?= $admin["bio"] ?> </span>
+                      <?php endforeach; ?>
+
+                      <button type="button" class="btn btn-secondary" onclick="closeModal('profileView')">Close</button>
+                    </dialog>
+
                 </div>
             </div>
         </div>
     </nav>
+    
 
     <!-- Search Bar -->
     <div class="container" data-bs-theme="light" style="padding-top: 100px;">
