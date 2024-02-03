@@ -120,7 +120,7 @@ function addUser($data, $img)
     $result = $stmt->fetchColumn();
     
     if($result > 0){
-        echo '<script>alert("Email Already Registered!");</script>';
+        echo '<script>alert("Email Already Registered!"); window.location.href = "index.php"; </script>';
         return 'error';
     }
     else{
@@ -169,7 +169,7 @@ function updateUser($data, $img)
         $result = $stmt->fetchColumn();
         
         if($result > 0){
-            echo '<script>alert("Email Already Registered!");</script>';
+            echo '<script>alert("Email Already Registered!"); window.location.href = "index.php"; </script>';
         }
         else{
             $stmt = $conn->prepare("UPDATE users SET picture = ?, first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
@@ -200,9 +200,14 @@ function searchUser($value)
     if(count($result) > 0){
         return $result;
     } else {
-        echo '<script>alert("Data Not Found!");</script>';
+        echo '<script>';
+        echo 'alert("Data Not Found!");';
+        echo 'window.location.href = "index.php";';
+        echo '</script>';
+        
+        
+        closeConnection();        
         return getAllUsers();
-    }
 
-    closeConnection();
+    }
 }
