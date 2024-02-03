@@ -9,7 +9,7 @@ function connectToDB()
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $dbName = "company_database";
+    $dbName = "attendance_database";
     $dataSourceName = "mysql:host=" . $servername . ";dbname=" . $dbName;
 
     try{
