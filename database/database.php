@@ -65,9 +65,9 @@ function getAllUsers()
     while($user = $stmt -> fetch(PDO::FETCH_ASSOC)){
         array_push($users, $user);
     }
-    return $users;
 
     closeConnection();
+    return $users;
 }
 
 function getAdmin()
@@ -76,6 +76,7 @@ function getAdmin()
     $stmt = $conn->prepare("SELECT * FROM admin");
     $stmt->execute();
     $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     closeConnection();
     return $admins;
 }
@@ -90,9 +91,29 @@ function deleteUser($data)
     closeConnection();
 }
 
+function generateId()
+{
+    $conn = connectToDB();
+
+    $stmt = $conn->prepare("SELECT MAX(CAST(SUBSTRING(id, 2) AS UNSIGNED)) AS maxNumber FROM users");
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $currentMax = $row['maxNumber'];
+
+    $currentLetter = 'T';
+    $nextLetter = chr(ord($currentLetter) + 1);
+    $nextNumber = ($currentMax % 999) + 1;
+
+    $newID = $nextLetter . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+    
+    return $newID;
+}
+
 function addUser($data, $img)
 { 
     $conn = connectToDB();
+
     $email = $data["email"];
     $stmt = $conn -> prepare("SELECT email FROM users WHERE email = '$email'");
     $stmt->execute();
@@ -100,12 +121,15 @@ function addUser($data, $img)
     
     if($result > 0){
         echo '<script>alert("Email Already Registered!");</script>';
+        return 'error';
     }
     else{
         move_uploaded_file($img['tmp_name'], 'img/' . $img['name']);
         $password = md5($data["first"] . "123");
-        $stmt = $conn->prepare("INSERT INTO users (picture, first_name, last_name, email, bio, password) VALUES (?, ?, ?, ?, ?, ?)");
+        $id = generateId();
+        $stmt = $conn->prepare("INSERT INTO users (id, picture, first_name, last_name, email, bio, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
+            $id,
             $img["name"],
             $data["first"],
             $data["last"],
@@ -117,20 +141,20 @@ function addUser($data, $img)
     closeConnection();
 }
 
-function updateUser($data)
+function updateUser($data, $img)
 {
     $conn = connectToDB();
-    $email = $data["email"];
-    $stmt = $conn -> prepare("SELECT email FROM users WHERE email = '$email'");
-    $stmt->execute();
-    $result = $stmt->fetchColumn();
-    
-    if($result > 0){
-        echo '<script>alert("Email Already Registered!");</script>';
+    if(empty($img['name'])){   
+        $img['name'] = $data['lastPicture'];
     }
-    else{
-        $stmt = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
+
+    $lastEmail = $data['lastEmail'];
+    $email = $data["email"];
+
+    if($lastEmail === $email){
+        $stmt = $conn->prepare("UPDATE users SET picture = ?, first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
         $stmt->execute([
+            $img["name"],
             $data["first"],
             $data["last"],
             $data["email"],
@@ -138,19 +162,28 @@ function updateUser($data)
             $data["id"]
         ]);
         header("Location: index.php");
-    }
-    closeConnection();
-}
 
-function updatePhotoUser($data, $img)
-{
-    $conn = connectToDB();
-    move_uploaded_file($img["tmp_name"], 'img/' . $img["name"]);
-    $stmt = $conn->prepare("UPDATE users SET picture = ? WHERE id = ?");
-    $stmt->execute([
-        $img["name"],
-        $data["id"]
-    ]);
+    }else{
+        $stmt = $conn -> prepare("SELECT email FROM users WHERE email = '$email'");
+        $stmt->execute();
+        $result = $stmt->fetchColumn();
+        
+        if($result > 0){
+            echo '<script>alert("Email Already Registered!");</script>';
+        }
+        else{
+            $stmt = $conn->prepare("UPDATE users SET picture = ?, first_name = ?, last_name = ?, email = ?, bio = ? WHERE id = ?");
+            $stmt->execute([
+                $img["name"],
+                $data["first"],
+                $data["last"],
+                $data["email"],
+                $data["bio"],
+                $data["id"]
+            ]);
+            header("Location: index.php");
+        }
+    }
     closeConnection();
 }
 
@@ -166,9 +199,10 @@ function searchUser($value)
 
     if(count($result) > 0){
         return $result;
-        closeConnection();
     } else {
-        echo '<script>alert("Data Not Found");</script>';
+        echo '<script>alert("Data Not Found!");</script>';
         return getAllUsers();
     }
+
+    closeConnection();
 }
