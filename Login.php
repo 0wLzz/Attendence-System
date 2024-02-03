@@ -245,36 +245,36 @@
         <div><span class="dot"></span></div>
     </div>
     <div class="box" id="box" style="margin-top: 20px;">
-    <div class="title">
-        <span>Login Page</span>
-    </div>
-
-    <form action="" method="POST">
-        <div class="container">
-            <div class="form-floating my-3">
-                <input type="email" class="form-control" id="email" placeholder="Email" name="email" required>
-                <label for="email">Email address</label>
-            </div>
-
-            <!-- Password -->
-            <div class="form-floating my-3">
-                <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
-                <label for="password">Password</label>
-            </div>
-
-            <!-- CheckBox -->
-            <div class="my-3">
-                <input class="form-check-input" type="checkbox" value="" id="checkbox" name="checkbox">
-                <label class="form-check-label" for="checkbox">Remember Me</label>
-            </div>
-
-            <!-- Login Button -->
-            <div class="d-flex justify-content-center">
-                <button class="btn btn-primary my-3" name="loginBtn">Login</button>
-            </div>
+        <div class="title">
+            <span style="text-align: center; font-size: 45px;">Login Page</span>
         </div>
-    </form>
-</div>
+
+        <form action="" method="POST">
+            <div class="container">
+                <div class="form-floating my-3">
+                    <input type="email" class="form-control" id="email" placeholder="Email" name="email" required>
+                    <label for="email">Email address</label>
+                </div>
+
+                <!-- Password -->
+                <div class="form-floating my-3">
+                    <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
+                    <label for="password">Password</label>
+                </div>
+
+                <!-- CheckBox -->
+                <div class="my-3">
+                    <input class="form-check-input" type="checkbox" value="" id="checkbox" name="checkbox">
+                    <label class="form-check-label" for="checkbox">Remember Me</label>
+                </div>
+
+                <!-- Login Button -->
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-primary my-3" name="loginBtn">Login</button>
+                </div>
+            </div>
+        </form>
+    </div>
 
 </body>
 
