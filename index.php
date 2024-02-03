@@ -10,22 +10,19 @@
   }
 
   if(isset($_POST["addBtn"])){
-    addUser($_POST, $_FILES["file"]);
+    $error = addUser($_POST, $_FILES["file"]);
+    if(!isset($error)){
+      header("Location: index.php");
+    }
   }
 
   if(isset($_POST["updateBtn"])){
-    updateUser($_POST);
-  }
-
-  if(isset($_POST["updatePhotoBtn"])){
-    updatePhotoUser($_POST, $_FILES["file"]);
-    header("Location: index.php");
+    updateUser($_POST, $_FILES["file"]);
   }
 
   if(isset($_GET["search"])){
     $users = searchUser($_GET["search"]);
   }
-
 ?>
 
 <!DOCTYPE html>
@@ -167,7 +164,7 @@
                         <td>
                             <div class="d-grid gap-2 d-md-block">
                                 <button class="btn btn-primary rounded-5" type="button" onclick="openModal('popupView<?= $num?>')">View</button>
-                                <dialog class="popupView" id="popupView<?= $num?>">
+                                <dialog class="popupView" id="popupView<?= $num?>" style="text-align: left">
 
                                     <div class="circular">
                                         <img src="<?= 'img/' . $user["picture"] ?>" alt="">
@@ -190,60 +187,52 @@
 
                                 <!-- Edit Button -->
                                 <button class="btn btn-warning rounded-5" type="button" onclick="openModal('editView<?=$num?>')">Edit</button>
-                                <dialog class="editView" id="editView<?=$num?>">
-                                    <form method="POST" enctype="multipart/form-data">
-                                        <input type="hidden" name="id" value="<?= $user["id"]?>">
+                          <dialog class="editView" id="editView<?=$num?>" style="text-align: left">
+                            <form method="POST" enctype="multipart/form-data">
+                              <input type="hidden" name="id" value="<?= $user["id"]?>">
+                              <input type="hidden" name="lastEmail" value="<?= $user["email"]?>">
+                              <input type="hidden" name="lastPicture" value="<?= $user["picture"]?>">
 
-                                        <h4>First Name :</h4>
-                                        <div class="form-group mb-3 ">
-                                            <input type="text" class="form-control" id="firstname" value="<?= $user["first_name"] ?>" name="first" required>
-                                        </div>
+                              <!-- Picture -->
+                              <h4>Picture :</h4> 
+                              <div class="mb-3">
+                                <input type="file" class="form-control" accept="img/*"  id="picture" name="file">
+                              </div>
+                            
+                              <h4>First Name :</h4> 
+                              <div class="form-group mb-3 ">
+                                <input type="text" class="form-control" id="firstname" value="<?= $user["first_name"] ?>" name="first" required>
+                              </div>
 
-                                        <h4>Last Name : </h4>
-                                        <div class="form-group mb-3 ">
-                                            <input type="text" class="form-control" id="lastname" value="<?= $user["last_name"] ?>" name="last" required>
-                                        </div>
+                              <h4>Last Name : </h4> 
+                              <div class="form-group mb-3 ">
+                                <input type="text" class="form-control" id="lastname" value="<?= $user["last_name"] ?>" name="last" required>
+                              </div>
+  
+                              <h4>Email : </h4> 
+                              <div class="form-group mb-3 ">
+                                <input type="email" class="form-control" id="email" value="<?= $user["email"] ?>" name="email" required>
+                              </div>
+  
+                              <h4>Bio : </h4> 
+                              <div class="form-description mb-3 "> 
+                                <textarea class="form-control" id="bio" rows="4" name="bio"><?= $user["bio"]?></textarea>
+                              </div>
 
-                                        <h4>Email : </h4>
-                                        <div class="form-group mb-3 ">
-                                            <input type="email" class="form-control" id="email" value="<?= $user["email"] ?>" name="email" required>
-                                        </div>
-
-                                        <h4>Bio : </h4>
-                                        <div class="form-description mb-3 ">
-                                            <textarea class="form-control" id="bio" rows="4" name="bio"><?= $user["bio"]?></textarea>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-primary" name="updateBtn">Update</button>
-                                        <button type="reset" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('editView<?=$num?>')">Cancel</button>
-                                    </form>
-                                </dialog>
+                              <button type="submit" class="btn btn-primary" name="updateBtn">Update</button>
+                              <button type="reset" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('editView<?=$num?>')">Cancel</button>
+                            </form>
+                          </dialog>
 
                                 <!-- Remove Button -->
                                 <button class="btn btn-danger rounded-5" type="button" onclick="openModal('warningRemove<?=$num?>')">Remove</button>
-                                <dialog class="warningRemove" id="warningRemove<?=$num?>">
+                                <dialog class="warningRemove" id="warningRemove<?=$num?>" style="text-align: left">
                                     <form action="" method="POST">
                                         <input type="hidden" name="id" value="<?= $user["id"]?>">
                                         <h2>Warning!</h2>
                                         <h5>Are you sure you want to delete this?</h5>
                                         <button type="submit" class="btn btn-danger" name="deleteBtn">Yes</button>
                                         <button type="button" class="btn btn-secondary" formmethod="dialog" onclick="closeModal('warningRemove<?=$num?>')">No</button>
-                                    </form>
-                                </dialog>
-
-                                <!-- Update Photo Button -->
-                                <button class="btn btn-info rounded-5" style="margin-top: 0.5rem" type="button" onclick="openModal('editPhotoView<?=$num?>')">Update Photo</button>
-                                <dialog class="editView" id="editPhotoView<?=$num?>">
-                                    <form method="POST" enctype="multipart/form-data">
-                                        <input type="hidden" name="id" value="<?= $user["id"]?>">
-                                        <!-- Picture -->
-                                        <h4>Picture :</h4>
-                                        <div class="mb-3">
-                                            <input type="file" class="form-control" accept="img/*" id="picture" name="file" required>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-primary" name="updatePhotoBtn">Update</button>
-                                        <button type="reset" class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('editPhotoView<?=$num?>')">Cancel</button>
                                     </form>
                                 </dialog>
                             </div>
@@ -259,9 +248,8 @@
             <dialog class="addView" id="addView">
                 <form method="POST" enctype="multipart/form-data">
                     <!-- Picture -->
-                    <h4>Picture :</h4>
-                    <div class="form-floating my-3">
-                        <input type="file" class="form-control" accept="img/*" name="file" required>
+                    <div class="mb-3">
+                      <input type="file" class="form-control" accept="img/*"  id="picture" name="file" required>
                     </div>
 
                     <h4>First Name :</h4>
@@ -302,4 +290,3 @@
 <script src="script.js"></script>
 
 </html>
-
