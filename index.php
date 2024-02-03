@@ -1,6 +1,6 @@
 <?php
-  require_once 'database/database.php';
 
+  require_once 'database/database.php';
   $users = getAllUsers();
   $admins = getAdmin();
 
@@ -46,18 +46,47 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
-</head>
-<body class="d-flex flex-column min-vh-100">
-    <!-- NavBar -->
+    <!-- Load icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- jQuery Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <style>
+        .search-input {
+            display: none;
+        }
+    </style>
+    </head>
+<body class="d-flex flex-column min-vh-100" style="background-color:#f2f2f2">
+ <!-- NavBar -->
     <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand">Attendence System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+       <div class="container">
+          <a class="navbar-brand fw-bold">Attendence System</a>
+       <div class="container" data-bs-theme="light" style="padding-top: 1px;">
+           <form class="d-flex ms-auto" style="max-width: 300px;" role="search" method="GET" action="">
+              <input class="form-control search-input" type="text" name="search" style="border-radius: 20px;" placeholder="Search" aria-label="Search" value="<?php if(isset($_GET["search"])) echo $_GET["search"];?>" required>
+              <button class="btn btn-light ms-auto" style="border-radius: 20px;" type="button" id="searchIcon"><i class="fa fa-search" aria-hidden="false"></i></button>
+              <button class="btn btn-secondary fw-bold shadow" type="submit" id="submitBtn" style="display: none; border-radius: 20px;">Search</button>
+           </form>
+        </div>
+        <script>
+             $(document).ready(function () {
+                 $("#searchIcon").click(function () {
+                      $(".search-input").toggle(); // Toggle visibility of the input
+                      $("#submitBtn").toggle(); // Toggle visibility of the submit button
+                      $(this).toggle(); // Toggle visibility of the icon
+                  });
+              });
+        </script>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-            </button>
-                <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
-                <div class="navbar-nav mt-auto">
-                    <a class="nav-link active" aria-current="page" href="index.php">Dashboard</a>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+          <div class="navbar-nav mt-auto">
+                    <!-- <a class="nav-link" aria-current="page"> | </a> -->
+                    <a class="nav-link" aria-current="page" href="index.php">Dashboard</a>
+                    <a class="nav-link" aria-current="page"> | </a>
                     <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Profile
@@ -77,6 +106,11 @@
 
                     <dialog class="editView" id="profileView">
                       <?php foreach($admins as $admin):?>
+                      <div class="text-center">
+                          <img src="https://www.pngmart.com/files/21/Admin-Profile-Vector-PNG-Isolated-HD.png" alt="" style="width: 300px; margin: auto;">
+                      </div>
+                      <h4 class="mt-3 text-center fw-bold text-uppercase text-muted">Administrator</h4>
+
                       <h4>First Name : </h4> 
                       <span> <?= $admin["first_name"] ?></span>
 
@@ -92,25 +126,16 @@
 
                       <button type="button" class="btn btn-secondary" onclick="closeModal('profileView')">Close</button>
                     </dialog>
-
-                </div>
             </div>
-        </div>
+         </div>
+       </div>
     </nav>
-    
-
-    <!-- Search Bar -->
-    <div class="container" data-bs-theme="light" style="padding-top: 100px;">
-        <form class="d-flex" role="search" method="GET" action="">
-            <input class="form-control" type="text" name="search" placeholder="Search" aria-label="Search" value="<?php if(isset($_GET["search"])) echo $_GET["search"];?>" required>
-            <button class="btn btn-primary" type="submit">Search</button>
-        </form>
-    </div>
     
     <!-- Table -->
     <div class="container my-5" style="background-color: rgb(255, 255, 255); color: black;">
         <table class="table table-hover caption-top" style="table-layout: fixed;">
-            <caption>List of users</caption>
+            <br>
+            <caption><h3>List of users</h3></caption>
             <thead class="table-dark">
               <tr>
                 <th scope="col" style="width: 50px;">No</th>
