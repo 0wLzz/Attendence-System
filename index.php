@@ -22,6 +22,7 @@
 
   if(isset($_GET["search"])){
     $users = searchUser($_GET["search"]);
+
   }
 ?>
 
